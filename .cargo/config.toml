@@ -1,0 +1,31 @@
+# NOTE: this file must stay host-OS-agnostic. Everything below is scoped to
+# the x86_64-pc-windows-gnu target explicitly (either via [target.<triple>]
+# or a _x86_64_pc_windows_gnu env suffix) so that native Linux/macOS builds
+# use the host's own toolchain instead of these MSYS2/Windows paths. Do NOT
+# add a [build] default `target`, or a bare (unsuffixed) CC/CXX/CMAKE here —
+# that would force every host build to go through the Windows toolchain too.
+
+[target.x86_64-pc-windows-gnu]
+linker = ".cargo/ucrt-gcc.cmd"
+ar = "C:/msys64/ucrt64/bin/ar.exe"
+rustflags = ["-Lnative=C:/msys64/ucrt64/lib", "-l", "advapi32"]
+
+# The active Rust toolchain is MSVC. SDL also needs the Windows registry
+# library when linking through link.exe.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-l", "advapi32"]
+
+[env]
+# Avoid CMake inheriting the unrelated STM32 toolchain from the shell PATH.
+# All Windows-only overrides below are suffixed for the windows-gnu target
+# specifically, so they don't leak into native Linux/macOS builds.
+CMAKE_x86_64_pc_windows_gnu = { value = ".cargo/ucrt-cmake.cmd", relative = true, force = true }
+CC_x86_64_pc_windows_gnu = { value = ".cargo/ucrt-gcc.cmd", relative = true, force = true }
+CXX_x86_64_pc_windows_gnu = { value = ".cargo/ucrt-gpp.cmd", relative = true, force = true }
+CFLAGS_x86_64_pc_windows_gnu = { value = "-std=gnu17 -IC:/msys64/ucrt64/include", force = true }
+CXXFLAGS_x86_64_pc_windows_gnu = { value = "-std=gnu++17 -IC:/msys64/ucrt64/include", force = true }
+PKG_CONFIG_PATH_x86_64_pc_windows_gnu = { value = "C:/msys64/ucrt64/lib/pkgconfig", force = true }
+# SDL 2.0's bundled CMake project declares an old policy baseline.  Recent
+# CMake releases require this compatibility floor to be set explicitly.
+# (Not Windows-specific — a recent host CMake needs this too.)
+CMAKE_POLICY_VERSION_MINIMUM = { value = "3.5", force = true }

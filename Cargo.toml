@@ -1,0 +1,23 @@
+[package]
+name = "shok0hex"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1"
+imgui = "0.12"
+imgui-sdl2-support = "0.13"
+imgui-glow-renderer = "0.13"
+
+# Windows has no standard system SDL2 package, so build it from source and
+# link it statically there. On Linux/macOS, link the distro/system SDL2
+# dynamically instead of compiling the bundled copy from source: the bundled
+# SDL 2.0.x source's PipeWire backend uses an old libpipewire API that newer
+# system pipewire headers (e.g. current Arch) no longer provide, so building
+# it from source fails there. Install `sdl2`/`SDL2` (or `sdl2-compat`) via
+# your package manager on non-Windows.
+[target.'cfg(windows)'.dependencies]
+sdl2 = { version = "0.37", features = ["bundled", "static-link"] }
+
+[target.'cfg(not(windows))'.dependencies]
+sdl2 = "0.37"

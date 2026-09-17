@@ -1,0 +1,7 @@
+/target/
+
+# Local tooling and runtime state
+/.history/
+/.vscode/
+/debug.log
+/imgui.ini
